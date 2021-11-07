@@ -21,7 +21,7 @@ function recurCopy(fPath, cPath) {
       fs.stat(path.join(fPath, file), (err, stats) => {
         if (err) throw err;
         if (!stats.isFile()) return recurCopy(path.join(fPath, file), path.join(cPath, file));
-        fs.copyFile(path.join(fPath, file), path.join(cPath, file), ()=>{});
+        fs.copyFile(path.join(fPath, file), path.join(cPath, file), (e)=>{if (e) throw e; });
       });
     }));
 }
