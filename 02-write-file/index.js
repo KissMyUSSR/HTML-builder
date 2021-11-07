@@ -11,7 +11,6 @@ process.stdin.on('data', data => {
   }
 
   writeStream.write(String(data));
-  process.stdout.write(data);
 });
 
 process.on('SIGINT', function () {
