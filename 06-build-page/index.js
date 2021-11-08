@@ -13,7 +13,6 @@ const copyAssetsPath = path.join(__dirname, 'project-dist', 'assets');
 
 // Check paths
 fs.access(projectPath, e => { if (e) mkdir(projectPath); });
-fs.access(copyAssetsPath, e => { if (e) mkdir(copyAssetsPath); });
 fs.access(componentsPath, e => { if (e) throw e; });
 fs.access(stylesPath, e => { if (e) throw e; });
 fs.access(assetsPath, e => { if (e) throw e; });
@@ -45,19 +44,32 @@ function bundleStyles(stylesPath, bundlePath) {
 
 // Copy '/assets'
 recurCopy(assetsPath, copyAssetsPath);
-function recurCopy(aPath, cPath) {
-  fs.access(cPath, err => { if (err) mkdir(cPath); });
-  
-  readdir(aPath)
-    .then(files => files.forEach(file => {
-      fs.stat(path.join(aPath, file), (err, stats) => {
-        if (err) throw err;
 
-        if (!stats.isFile()) return recurCopy(path.join(aPath, file), path.join(cPath, file));
-        
-        fs.copyFile(path.join(aPath, file), path.join(cPath, file), e => {if (e) throw e; });
+function recurCopy(aPath, cPath) {
+  fs.access(cPath, err => {
+    if (!err) fs.rm(cPath, { recursive: true, force: true }, err => {
+      if (err) throw err;
+
+      copyFolder(aPath, cPath);
+    });
+    else copyFolder(aPath, cPath);
+  });
+
+  function copyFolder(aPath, cPath) {
+    mkdir(cPath)
+      .then(() => {
+        readdir(aPath)
+          .then(files => files.forEach(file => {
+            fs.stat(path.join(aPath, file), (err, stats) => {
+              if (err) throw err;
+      
+              if (!stats.isFile()) return recurCopy(path.join(aPath, file), path.join(cPath, file));
+              
+              fs.copyFile(path.join(aPath, file), path.join(cPath, file), e => {if (e) throw e; });
+            });
+          }));
       });
-    }));
+  }
 }
 
 // Replace templates
